@@ -32,9 +32,24 @@ module Helpers
     map :fdiff => :filterdiff
   end
 
+  class Os < Thor
+    desc 'sleepin <n minutes> [--background]', 'systemctl suspend in n minutes'
+    option :background, :desc => 'wait in background process'
+    def sleepin(mintues)
+      if options[:background]
+        exit if Kernel.fork
+      end
+      sleep(mintues.to_i * 60)
+      Kernel.exec('systemctl suspend')
+    end
+  end
+
   class Helpers < Thor
     desc 'git SUBCOMMAND ...ARGS', 'git helpers'
     subcommand 'git', Git
+
+    desc 'os SUBCOMMAND ...ARGS', 'OS helpers'
+    subcommand 'os', Os
   end
 
 end
