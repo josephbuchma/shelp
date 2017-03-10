@@ -29,7 +29,20 @@ module Helpers
       end
     end
 
+    desc 'commitbranch <commit_msg_and_branch_name> [branch_name]', '(alias cb) Commit current changes to new branch and go back'
+    def commitbranch(name, branch_name=nil)
+      if branch_name.nil? then
+        branch_name = name
+      end
+      current_branch = `git rev-parse --abbrev-ref HEAD`
+      Kernel.system("git checkout -b #{branch_name}")
+      Kernel.system("git add .")
+      Kernel.system("git commit -m #{name}")
+      Kernel.system("git checkout #{current_branch}")
+    end
+
     map :fdiff => :filterdiff
+    map :cb => :commitbranch
   end
 
   class Os < Thor
