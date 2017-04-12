@@ -57,12 +57,24 @@ module Helpers
     end
   end
 
+  class Install < Thor
+    desc 'java <path/to/oracle_java.rpm>', 'install Oracle java from downloaded rpm package. Make sure `alien` is installed'
+    def java(rpm)
+      system("alien --install #{rpm}")
+      unpack200 = Dir["/usr/java/**/bin/unpack200"].first
+      Dir["/usr/java/**/*.pack"].map {|f| `#{unpack200} #{f} #{File.dirname(f)+'/'+File.basename(f, ".*")}.jar`}
+    end
+  end
+
   class Helpers < Thor
     desc 'git SUBCOMMAND ...ARGS', 'git helpers'
     subcommand 'git', Git
 
     desc 'os SUBCOMMAND ...ARGS', 'OS helpers'
     subcommand 'os', Os
+
+    desc 'install SUBCOMMAND ...ARGS', 'install scripts for not easy apt-gettable things'
+    subcommand 'install', Install
   end
 
 end
