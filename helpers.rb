@@ -66,6 +66,51 @@ module Helpers
     end
   end
 
+  class Go < Thor
+    desc 'pprofmon <binary> <pprof_dump_url> [--interval] [--output]', 'make pprof dumps + svg graphs by interval (5s default) to specified output (./pprofmon default)'
+    option :interval, :type=>:numeric, :default=>1, :desc=>'pprof dump interval'
+    option :output, :type=>:string, :deafult=>'./pprofmon/', :desc=>'set dumps output directory'
+    option :verbose, :type=>:boolean, :default=>false
+    def pprofmon(binary, dump_url)
+      if binary.nil? || dump_url.nil?
+        p 'invalid invocation, see help'
+        exit 1
+      end
+      output = options[:output] || './ppromon'
+      interval = options[:interval].to_i || 1
+
+      p "Setting output to #{output}"
+      `mkdir -p #{output}`
+
+      verbose "carbon-copy #{binary} to #{output}"
+      `cp #{binary} #{File.join(output, binary)}`
+
+      p "starting #{binary}"
+      pid = fork { exec binary }
+
+      loop {
+        verbose "sleeping #{interval} seconds"
+        sleep interval
+        if (Process.getpgid(pid) rescue nil).nil?
+          puts "#{binary} is no longer running. See results in #{output}"
+          exit 0
+        end
+        now = Time.now.to_s.gsub(' ', '_')
+        profpath = File.join("#{output}","#{now}.prof")
+        svgpath = File.join("#{output}","#{now}.svg")
+        verbose "saving #{profpath}"
+        `curl #{dump_url} > #{profpath}`
+        verbose "generating #{svgpath}"
+        `go tool pprof -svg #{binary} #{profpath} > #{svgpath}`
+      }
+    end
+
+    private
+    def verbose(s)
+      p(s) if options[:verbose]
+    end
+  end
+
   class Helpers < Thor
     desc 'git SUBCOMMAND ...ARGS', 'git helpers'
     subcommand 'git', Git
@@ -75,6 +120,9 @@ module Helpers
 
     desc 'install SUBCOMMAND ...ARGS', 'install scripts for not easy apt-gettable things'
     subcommand 'install', Install
+
+    desc 'go SUBCOMMAND ...ARGS', 'golang tools'
+    subcommand 'go', Go
   end
 
 end
