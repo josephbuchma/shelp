@@ -123,6 +123,17 @@ module Helpers
 
     desc 'go SUBCOMMAND ...ARGS', 'golang tools'
     subcommand 'go', Go
+
+    desc 'edit', 'edit this helpers'
+    def edit
+      path = __FILE__
+      if File.symlink? path
+        path = File.readlink path
+      end
+      Dir.chdir(File.dirname(path)) do
+        Kernel.exec "#{ENV['EDITOR']} #{path}"
+      end
+    end
   end
 
 end
