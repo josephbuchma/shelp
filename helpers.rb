@@ -41,8 +41,14 @@ module Helpers
       Kernel.system("git checkout #{current_branch}")
     end
 
+    desc 'edit-changed', '(alias ec) Open uncommitted changed files in $EDITOR'
+    def edit_changed
+      Kernel.exec "#{ENV['EDITOR']} `git diff --name-only`"
+    end
+
     map :fdiff => :filterdiff
     map :cb => :commitbranch
+    map :ec => :edit_changed
   end
 
   class Os < Thor
