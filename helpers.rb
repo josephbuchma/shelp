@@ -41,9 +41,24 @@ module Helpers
       Kernel.system("git checkout #{current_branch}")
     end
 
-    desc 'edit-changed', '(alias ec) Open uncommitted changed files in $EDITOR'
-    def edit_changed
-      Kernel.exec "#{ENV['EDITOR']} `git diff --name-only`"
+    desc 'edit-changed [commit_id]', '(alias ec) Open changed files in $EDITOR'
+    def edit_changed(commit=nil)
+      if commit.nil?
+        Kernel.exec "#{ENV['EDITOR']} `git diff --name-only`"
+      else
+        Kernel.exec "#{ENV['EDITOR']} `git diff-tree --no-commit-id --name-only -r #{commit}`"
+      end
+    end
+
+    desc 'reset-branch [branch_name]', 'Reset branch changes ("uncommit" all commits of this branch)'
+    option :base_branch, :default=>'master', :desc=>'Set base branch (probably parent branch, and the one you plan to merge your changes into)'
+    def reset_branch(name=nil)
+      if name.nil? then
+        name = `git rev-parse --abbrev-ref HEAD`
+      end
+      Kernel.system "git checkout #{name}"
+      r = `git merge-base master #{name}`
+      Kernel.system "git reset #{r}"
     end
 
     map :fdiff => :filterdiff
