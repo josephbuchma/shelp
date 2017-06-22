@@ -29,7 +29,7 @@ module Helpers
       end
     end
 
-    desc 'commitbranch <commit_msg_and_branch_name> [branch_name]', '(alias cb) Commit current changes to new branch and go back'
+    desc 'commitbranch <commit_msg_and_branch_name> [branch_name]', '(alias cb) Commit current changes to new branch and go back (useful for quick backups)'
     def commitbranch(name, branch_name=nil)
       if branch_name.nil? then
         branch_name = name
@@ -97,7 +97,7 @@ module Helpers
         p 'invalid invocation, see help'
         exit 1
       end
-      output = options[:output] || './ppromon'
+      output = options[:output] || './pprofmon'
       interval = options[:interval].to_i || 1
 
       p "Setting output to #{output}"
