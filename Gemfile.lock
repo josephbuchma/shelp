@@ -1,0 +1,21 @@
+GIT
+  remote: https://github.com/josephbuchma/ruby-git_diff_parser
+  revision: 9acc263614c79e2f61316485eb69f098f62a79c2
+  branch: removed_lines
+  specs:
+    git_diff_parser (3.0.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    thor (0.19.4)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  git_diff_parser!
+  thor
+
+BUNDLED WITH
+   1.13.1

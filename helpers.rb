@@ -61,6 +61,34 @@ module Helpers
       Kernel.system "git reset #{r}"
     end
 
+    desc 'diff-blame-removed-stats [revision]', 'shows how many lines have been removed by changes per user'
+    option :filter, :type=>:string, :default=>nil, :desc=>'filter by file name'
+    def diff_blame_removed_stats(revision="HEAD")
+      require 'git_diff_parser'
+
+      diff = `git diff #{revision}`
+
+      patches = GitDiffParser.parse(diff)
+      skip_file = lambda { |name| false }
+      if filter = options[:filter] then
+        pattern = Regexp.new(filter)
+        skip_file = lambda { |name| !(name =~ pattern) }
+      end
+      stats = {}
+
+      patches.each do |p|
+        next if skip_file.call(p.file)
+        blame = `git blame -c #{p.file} #{revision}`.lines
+        p.removed_lines.each do |l|
+          user = /^[a-f0-9]{8}\s+\((.*?\d+)\)/.match(blame[l.number-1]).captures[0].split(/\s+/)[0..-5].join(' ').strip
+          stats[user] ||= 1
+          stats[user]+=1
+        end
+      end
+
+      puts stats.inspect
+    end
+
     map :fdiff => :filterdiff
     map :cb => :commitbranch
     map :ec => :edit_changed

@@ -2,4 +2,6 @@
 
 [[ $# -ne 1 ]] && echo 'usage: ./install.sh <alias>' && exit
 
-sudo ln -is `pwd`/helpers.rb /usr/bin/$1
+bundle install
+
+sudo ln -is `pwd`/run.sh /usr/bin/$1
